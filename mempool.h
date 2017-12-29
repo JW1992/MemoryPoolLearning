@@ -1,16 +1,15 @@
-/***mempool.h***/
-template<int ObjectSize,int NumofObjects=20> class MemPool{
+template<int ObjectSize,int NumofObjects=3> class MemPool{
 private:
-    const int MemBlockSize; //每个内存块的大小
-    const int ItemSize;    //每个内存节点的大小
+    const int MemBlockSize; //Size of a memory block
+    const int ItemSize;    //Size of a memory node
 
-    //空闲节点结构体
+    //Free node
     struct FreeNode{
         FreeNode* pNext;
         char data[ObjectSize];
     };
 
-    //内存块结构体
+   	//One memory block can include numbers of nodes.
     struct MemBlock{
         MemBlock *pNext;
         FreeNode data[NumofObjects];
@@ -37,29 +36,28 @@ public:
     void free(void*);
 };
 
-//分配空闲的节点
+//Allocating a free node
 template<int ObjectSize,int NumofObjects> 
 void* MemPool<ObjectSize,NumofObjects>::malloc(){
-    if(freeNodeHeader==NULL){      //无空闲节点
+    if(freeNodeHeader==NULL){      //No more free nodes
         MemBlock* newBlock=new MemBlock;
-        newBlock->data[0].pNext=NULL; //设置内存块的第一个节点为空闲节点链表的最后一个
+        newBlock->data[0].pNext=NULL; //Initiate a new memory block.
         for(int i=1; i<NumofObjects;++i)
             newBlock->data[i].pNext=&newBlock->data[i-1];
         freeNodeHeader=&newBlock->data[NumofObjects-1];
         newBlock->pNext=memBlockHeader;
     }
-    //返回空节点闲链表的第一个节点
+    //Return the first free node in the memory block.
     void* freeNode=freeNodeHeader;
     freeNodeHeader=freeNodeHeader->pNext;
     return freeNode;
 }
 
-//释放已经分配的节点
+//Free a node
 template<int ObjectSize,int NumofObjects> 
 void MemPool<ObjectSize,NumofObjects>::free(void* p){
     FreeNode* pNode=(FreeNode*)p;
-    pNode->pNext=freeNodeHeader;//将释放的节点插入空闲节点头部
+    pNode->pNext=freeNodeHeader;//Insert node
     freeNodeHeader=pNode;
 }
-/***end mempool.h***/
 

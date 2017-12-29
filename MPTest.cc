@@ -1,4 +1,3 @@
-/***main.cpp***/
 #include <iostream>
 #include <stdio.h>
 using namespace std;
@@ -24,9 +23,11 @@ public:
     void operator delete(void* p);
 };
 
-//定义内存池对象
+//Define size of memory buffer
 MemPool<sizeof(ActualClass),2> mp;
 
+
+//Overloading new/delete operators
 void* ActualClass::operator new(size_t size){
     return mp.malloc();
 }
@@ -46,6 +47,7 @@ int main(){
     p2->print();
     delete p1;
 
+	//The same piece of memory is expected to be used
     p1=new ActualClass;
     p1->print();
 
@@ -58,4 +60,3 @@ int main(){
 
     getchar();
 }
-/***end main.cpp***/
